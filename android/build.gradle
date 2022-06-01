@@ -33,3 +33,7 @@ android {
         minSdkVersion 16
     }
 }
+
+dependencies {
+    implementation files('src\\main\\java\\libs\\CH34xUARTDriver.jar')
+}

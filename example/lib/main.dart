@@ -18,6 +18,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
 
+  String _deviceValue = '';
+
+  //获取回调函数
+  late StreamSubscription _ssp;
+
   @override
   void initState() {
     super.initState();
@@ -30,8 +35,28 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
+      // 使用Method Channel调用方法
       platformVersion =
           await CardScaner.platformVersion ?? 'Unknown platform version';
+
+      // 声明变量获取回调函数
+      // _ssp = CardScaner.receiveStream.listen((event) {
+      //   print("返回的数据" + event.toString());
+      // }, onError: (error) {
+      //   print(error.toString());
+      // });
+
+      // 不声明变量获取回调函数
+      CardScaner.receiveStream.listen((event) {
+        print("返回的数据" + event.toString());
+
+        // 返回数据
+        setState(() {
+          _deviceValue = _deviceValue + event.toString();
+        });
+      }, onError: (error) {
+        print(error.toString());
+      });
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -51,10 +76,31 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('CardScaner Plugin Demo '),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+            child: Column(
+          children: [
+            Text('Device : $_platformVersion\n'),
+            Text('Value : $_deviceValue\n'),
+          ],
+        )),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+
+            try {
+              await CardScaner.openDevice;
+            } catch (ex) {
+              print("打开设备出现错误：" + ex.toString());
+            }
+
+            try {
+              await CardScaner.configDevice;
+            } catch (ex) {
+              print("配置设备出现错误：" + ex.toString());
+            }
+          },
+          child: Icon(Icons.open_in_browser),
         ),
       ),
     );
