@@ -5,6 +5,7 @@ import android.content.Context;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +15,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 import cn.wch.ch34xuartdriver.CH34xUARTDriver;
-import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -54,10 +54,14 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private class ReadThread extends Thread {
         byte[] buffer = new byte[4096];
 
+
         @Override
         public void run() {
             super.run();
-
+            StringBuilder sb = new StringBuilder();
+            //是否已经读到回车符
+            boolean haveCR=false;
+            byte[] value=new byte[1];
             while (!isInterrupted()) {
 
                 int length = driver.ReadData(buffer, 4096);
@@ -65,10 +69,37 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (length > 0) {
 
                     // 将获取的数据传入
-                    String recv = toHexString(buffer, length);        //��16�������
+                    //如果
+                    for(int i=0;i<length;i++){
+                        switch (String.valueOf(buffer[i])){
 
-                    // 发送数据
-                    onDataReceived(recv);
+                            //回车符
+                            case "13":
+                                haveCR=true;
+                                break;
+                            case "10":
+                                //换行，结束符
+                                //上一个为回车符才是完整结束
+                                if(haveCR){
+                                    String recv = toHexString(sb.toString());        //以16进制输出
+                                    // 发送数据
+                                    onDataReceived(recv);
+                                }else{
+                                    haveCR=false;
+                                }
+                                //清空
+                                sb.delete(0,sb.length());
+                                break;
+                            default:
+                                value[0]= buffer[i];
+                                sb.append(new String(value));
+                                haveCR=false;
+                                break;
+                        }
+                    }
+
+
+
                 }
 
                 try {
@@ -269,6 +300,8 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 driver.SetConfig(baudRate, dataBit, stopBit, parity, flowControl);
 
                 System.out.println("步骤1-3");
+                //清空串口遗留数据
+                driver.ReadData(new byte[4096], 4096);
 
                 // 声明线程
                 mReadThread = new ReadThread();
@@ -310,27 +343,31 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
     }
 
     /**
-     * 将字符串转成16进制数据
-     *
-     * @param arg
-     * @param length
+     * 转换16进制
+     * @param result
      * @return
      */
-    private String toHexString(byte[] arg, int length) {
-        String result = new String();
-        if (arg != null) {
-            for (int i = 0; i < length; i++) {
-                result = result
-                        + (Integer.toHexString(
-                        arg[i] < 0 ? arg[i] + 256 : arg[i]).length() == 1 ? "0"
-                        + Integer.toHexString(arg[i] < 0 ? arg[i] + 256
-                        : arg[i])
-                        : Integer.toHexString(arg[i] < 0 ? arg[i] + 256
-                        : arg[i])) + " ";
+    private String toHexString(String result) {
+        try {
+            //转int
+            long value = Long.parseLong(result);
+            //转16进制
+            result = Long.toHexString(value);
+            int resultLength = result.length();
+            StringBuilder sb = new StringBuilder();
+            //字符串转卡号（按规则排序）
+            for (int i = resultLength; i > 1; i = i - 2) {
+                sb.append(result.charAt(i-2));
+                sb.append(result.charAt(i-1));
+
             }
-            return result;
+            return sb.toString().toUpperCase();
+
+        } catch (Exception e) {
+            Log.d("toHexString", e.toString());
         }
-        return "";
+
+        return result;
     }
 
     @Override

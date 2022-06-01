@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:card_scaner/card_scaner.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
 
         // 返回数据
         setState(() {
-          _deviceValue = _deviceValue + event.toString();
+          _deviceValue = _deviceValue + "=>" + event.toString();
         });
       }, onError: (error) {
         print(error.toString());
@@ -87,7 +87,6 @@ class _MyAppState extends State<MyApp> {
         )),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-
             try {
               await CardScaner.openDevice;
             } catch (ex) {
