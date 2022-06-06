@@ -59,45 +59,59 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
         public void run() {
             super.run();
             StringBuilder sb = new StringBuilder();
-            //是否已经读到回车符
-            boolean haveCR=false;
-            byte[] value=new byte[1];
+
+            // 是否已经读到回车符
+            boolean haveCR = false;
+            // 正常读取数据
+            byte[] value = new byte[1];
+
             while (!isInterrupted()) {
 
+                // 获取串口数据长度
                 int length = driver.ReadData(buffer, 4096);
 
                 if (length > 0) {
+                    
+                    // 将获取的数据循环处理
+                    for (int i = 0; i < length; i++) {
+                        switch (String.valueOf(buffer[i])) {
 
-                    // 将获取的数据传入
-                    //如果
-                    for(int i=0;i<length;i++){
-                        switch (String.valueOf(buffer[i])){
-
-                            //回车符
                             case "13":
-                                haveCR=true;
+                                //回车符
+                                haveCR = true;
+
                                 break;
                             case "10":
                                 //换行，结束符
                                 //上一个为回车符才是完整结束
-                                if(haveCR){
-                                    String recv = toHexString(sb.toString());        //以16进制输出
+                                if (haveCR) {
+
+                                    // 将正常的数据以16进制进行转换（记住，这里是将所有数据整体合并后再进行进制的转换）
+                                    String recv = toHexString(sb.toString());
+
                                     // 发送数据
                                     onDataReceived(recv);
-                                }else{
-                                    haveCR=false;
+                                } else {
+                                    haveCR = false;
                                 }
-                                //清空
-                                sb.delete(0,sb.length());
+
+                                // 清空
+                                sb.delete(0, sb.length());
+
                                 break;
                             default:
-                                value[0]= buffer[i];
+                                // 正常读取
+                                value[0] = buffer[i];
+
+                                // 将数据加入
                                 sb.append(new String(value));
-                                haveCR=false;
+
+                                // 正常的数据即将回车符标识设置为Falose
+                                haveCR = false;
+
                                 break;
                         }
                     }
-
 
 
                 }
@@ -116,6 +130,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     /**
      * 数据返回通道
+     *
      * @param newString
      */
     protected void onDataReceived(final String newString) {
@@ -194,7 +209,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     // 返回配置设备成功消息
                     result.success("DeviceCloseSuccess");
 
-                }catch (Exception exception){
+                } catch (Exception exception) {
                     System.out.println("关闭设备出现错误，Ex：" + exception.getMessage());
 
                     // 返回配置设备失败消息
@@ -211,17 +226,15 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     /**
      * 打开设备
+     *
      * @throws Exception
      */
     private void openDevice() throws Exception {
-        System.out.println("步骤1");
         // 先声明设备
         driver = new CH34xUARTDriver(
                 (UsbManager) activity.getSystemService(Context.USB_SERVICE),
                 activity.getApplicationContext(),
                 ACTION_USB_PERMISSION);
-
-        System.out.println("步骤2");
 
         // 检测是否支持设备
         if (!driver.UsbFeatureSupported()) {
@@ -229,29 +242,18 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
             throw new Exception("DeviceNoSupported");
         }
 
-        System.out.println("步骤3");
-
         // 恢复设备列表
         int retval = driver.ResumeUsbList();
 
-        System.out.println("步骤4");
-
         if (retval == -1) {
-
-            System.out.println("步骤5");
 
             // 设备打开失败应该关闭设备
             driver.CloseDevice();
-
-
-            System.out.println("步骤6");
 
             // 设备打开失败
             throw new Exception("DeviceOpenFail");
 
         } else if (retval == 0) {
-
-            System.out.println("步骤7");
 
             if (driver.mDeviceConnection == null) {
 
@@ -260,8 +262,6 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             } else {
 
-                System.out.println("步骤8");
-
                 if (!driver.UartInit()) {
 
                     System.out.println("步骤9");
@@ -269,9 +269,6 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     // 设备初始化失败
                     throw new Exception("DeviceInitialixationFail");
 
-                } else {
-                    // 成功打开串口
-                    System.out.println("步骤10");
                 }
             }
         }
@@ -279,17 +276,17 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     /**
      * 配置设备
+     *
      * @throws Exception
      */
     private void configDevice() throws Exception {
-
-        System.out.println("步骤1-1");
 
         // 配置设备
         if (driver != null && driver.isConnected()) {
             try {
 
                 // 设备配置：波特率，数据位，停止位，奇偶校验证位，流控制
+                // 后期如果需要增加配置功能，需要将该接口进行扩展
                 int baudRate = 9600;
                 byte dataBit = 8;
                 byte stopBit = 1;
@@ -299,7 +296,6 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 // 配置设备
                 driver.SetConfig(baudRate, dataBit, stopBit, parity, flowControl);
 
-                System.out.println("步骤1-3");
                 //清空串口遗留数据
                 driver.ReadData(new byte[4096], 4096);
 
@@ -309,21 +305,19 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 // 开始线程
                 mReadThread.start();
 
-
-                System.out.println("步骤1-4");
-
             } catch (Exception exception) {
 
                 // 配置设备失败
                 throw new Exception("DeviceConfigFailed");
             }
         } else {
-            System.out.println("步骤1-2");
+            throw new Exception("DeviceNotOpen");
         }
     }
 
     /**
      * 关闭设备
+     *
      * @throws Exception
      */
     private void closeDevice() throws Exception {
@@ -344,6 +338,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     /**
      * 转换16进制
+     *
      * @param result
      * @return
      */
@@ -351,16 +346,21 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
         try {
             //转int
             long value = Long.parseLong(result);
-            //转16进制
-            result = Long.toHexString(value);
-            int resultLength = result.length();
-            StringBuilder sb = new StringBuilder();
-            //字符串转卡号（按规则排序）
-            for (int i = resultLength; i > 1; i = i - 2) {
-                sb.append(result.charAt(i-2));
-                sb.append(result.charAt(i-1));
 
+            //转16进制，是将整组数据转换成16进制，而不是单个转换
+            result = Long.toHexString(value);
+
+            // 返回数据
+            StringBuilder sb = new StringBuilder();
+
+            //字符串转卡号（按规则排序），每次取两位并倒序组合
+            for (int i = result.length(); i > 1; i = i - 2) {
+
+                sb.append(result.charAt(i - 2));
+                sb.append(result.charAt(i - 1));
             }
+
+            // 将数据
             return sb.toString().toUpperCase();
 
         } catch (Exception e) {
