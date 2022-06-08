@@ -116,14 +116,15 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
                 }
 
-                try {
-
-                    // 延时100ms
-                    Thread.sleep(100);
-
-                } catch (Exception ex) {
-
-                }
+                // 将延时取消，看是否会出现乱码数据
+//                try {
+//
+//                    // 延时100ms
+//                    Thread.sleep(100);
+//
+//                } catch (Exception ex) {
+//
+//                }
             }
         }
     }
