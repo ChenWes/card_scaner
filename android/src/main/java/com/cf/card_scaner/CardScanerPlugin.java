@@ -328,8 +328,8 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 // 调用关闭设备方法
                 driver.CloseDevice();
 
-                // 线程并入
-                mReadThread.join();
+                // 线程停止
+                mReadThread.interrupt();
             } catch (Exception exception) {
                 // 关闭设备错误
                 throw new Exception("CloseDeviceFailed");
