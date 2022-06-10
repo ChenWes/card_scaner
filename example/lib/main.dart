@@ -92,12 +92,6 @@ class _MyAppState extends State<MyApp> {
             } catch (ex) {
               print("打开设备出现错误：" + ex.toString());
             }
-
-            try {
-              await CardScaner.configDevice;
-            } catch (ex) {
-              print("配置设备出现错误：" + ex.toString());
-            }
           },
           child: Icon(Icons.open_in_browser),
         ),

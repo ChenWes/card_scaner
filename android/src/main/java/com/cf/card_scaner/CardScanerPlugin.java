@@ -184,7 +184,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 }
                 break;
 
-            case "configDevice":
+           /* case "configDevice":
 
                 try {
                     // 配置设备
@@ -199,7 +199,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     // 返回配置设备失败消息
                     result.error("DeviceConfigFail", "DeviceConfigFail", exception);
                 }
-                break;
+                break;*/
 
             case "closeDevice":
 
@@ -242,9 +242,22 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
             // 不支持设备
             throw new Exception("DeviceNoSupported");
         }
+        //获取权限
+        int retval = driver.ResumeUsbPermission();
+        //无权限，等待200毫秒
+        while (retval != 0) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            retval = driver.ResumeUsbPermission();
+        }
 
         // 恢复设备列表
-        int retval = driver.ResumeUsbList();
+        retval = driver.ResumeUsbList();
 
         if (retval == -1) {
 
@@ -271,6 +284,8 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     throw new Exception("DeviceInitialixationFail");
 
                 }
+                //配置设备
+                configDevice();
             }
         }
     }
