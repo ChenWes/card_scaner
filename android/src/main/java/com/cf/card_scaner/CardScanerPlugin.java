@@ -247,7 +247,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
         //无权限，等待200毫秒
         while (retval != 0) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
