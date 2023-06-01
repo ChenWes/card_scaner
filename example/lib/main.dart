@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             try {
-              await CardScaner.openDevice;
+              CardScaner.openDevice;
             } catch (ex) {
               print("打开设备出现错误：" + ex.toString());
             }
