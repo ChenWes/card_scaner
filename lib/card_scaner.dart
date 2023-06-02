@@ -18,12 +18,16 @@ class CardScaner {
     try {
       final String? result = await _channel.invokeMethod('openDevice');
       return result;
-    } catch (ex) {
-      final String? result =
-          await Future.delayed(const Duration(seconds: 2), () {
-        return openDevice;
-      });
-      return result;
+    } on PlatformException catch (ex) {
+      if (ex.message == 'DeviceOpenFail') {
+        final String? result =
+            await Future.delayed(const Duration(seconds: 2), () {
+          return openDevice;
+        });
+        return result;
+      } else {
+        return null;
+      }
     }
   }
 

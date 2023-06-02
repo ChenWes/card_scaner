@@ -180,7 +180,7 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     System.out.println("打开设备出现错误，Ex：" + exception.getMessage());
 
                     // 返回打开设备失败消息
-                    result.error("DeviceOpenFail", "DeviceOpenFail", exception);
+                    result.error(exception.getMessage(), exception.getMessage(), exception);
                 }
                 break;
 
