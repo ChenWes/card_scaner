@@ -244,50 +244,46 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
         //获取权限
         int retval = driver.ResumeUsbPermission();
-        //无权限，等待200毫秒
-        while (retval != 0) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+        if(retval==0){
+            // 恢复设备列表
+            retval = driver.ResumeUsbList();
 
-            retval = driver.ResumeUsbPermission();
-        }
+            if (retval == -1) {
 
-        // 恢复设备列表
-        retval = driver.ResumeUsbList();
-
-        if (retval == -1) {
-
-            // 设备打开失败应该关闭设备
-            driver.CloseDevice();
-
-            // 设备打开失败
-            throw new Exception("DeviceOpenFail");
-
-        } else if (retval == 0) {
-
-            if (driver.mDeviceConnection == null) {
+                // 设备打开失败应该关闭设备
+                driver.CloseDevice();
 
                 // 设备打开失败
                 throw new Exception("DeviceOpenFail");
 
-            } else {
+            } else if (retval == 0) {
 
-                if (!driver.UartInit()) {
+                if (driver.mDeviceConnection == null) {
 
-                    System.out.println("步骤9");
+                    // 设备打开失败
+                    throw new Exception("DeviceOpenFail");
 
-                    // 设备初始化失败
-                    throw new Exception("DeviceInitialixationFail");
+                } else {
 
+                    if (!driver.UartInit()) {
+
+                        System.out.println("步骤9");
+
+                        // 设备初始化失败
+                        throw new Exception("DeviceInitialixationFail");
+
+                    }
+                    //配置设备
+                    configDevice();
                 }
-                //配置设备
-                configDevice();
             }
+        }else{
+            driver.CloseDevice();
+            // 设备打开失败
+            throw new Exception("DeviceOpenFail");
         }
+
+
     }
 
     /**

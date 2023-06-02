@@ -71,6 +71,10 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> openDevice() async {
+    CardScaner.openDevice;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -86,13 +90,7 @@ class _MyAppState extends State<MyApp> {
           ],
         )),
         floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            try {
-              CardScaner.openDevice;
-            } catch (ex) {
-              print("打开设备出现错误：" + ex.toString());
-            }
-          },
+          onPressed: openDevice,
           child: Icon(Icons.open_in_browser),
         ),
       ),
