@@ -1,6 +1,4 @@
-
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -16,9 +14,8 @@ class CardScaner {
   }
 
   /// 打开设备
-  static Future<String?> get openDevice async {
-    final String? result = await _channel.invokeMethod('openDevice');
-    return result;
+  static void get openDevice async {
+    _channel.invokeMethod('openDevice');
   }
 
   /// 配置设备
@@ -33,11 +30,12 @@ class CardScaner {
     return result;
   }
 
-
   /// Stream(Event) coming from Android
   /// 调用数据流
   static Stream get receiveStream {
-    _eventStream = _eventChannel.receiveBroadcastStream().map<String>((dynamic value) => value);
+    _eventStream = _eventChannel
+        .receiveBroadcastStream()
+        .map<String>((dynamic value) => value);
     return _eventStream;
   }
 }
