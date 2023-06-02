@@ -14,8 +14,17 @@ class CardScaner {
   }
 
   /// 打开设备
-  static void get openDevice async {
-    _channel.invokeMethod('openDevice');
+  static Future<String?> get openDevice async {
+    try {
+      final String? result = await _channel.invokeMethod('openDevice');
+      return result;
+    } catch (ex) {
+      final String? result =
+          await Future.delayed(const Duration(seconds: 2), () {
+        return openDevice;
+      });
+      return result;
+    }
   }
 
   /// 配置设备
