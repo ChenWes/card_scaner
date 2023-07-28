@@ -140,9 +140,9 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-
                     // 通过数据流发送数据
                     mEventSink.success(newString);
+
                 }
             });
         }
@@ -162,7 +162,6 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         switch (call.method) {
             case "getPlatformVersion":
-
                 // 回复获取平台版本消息
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
@@ -362,6 +361,11 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
             //转16进制，是将整组数据转换成16进制，而不是单个转换
             result = Long.toHexString(value);
 
+            //卡号为8位数，补到8位
+            while (result.length() < 8) {
+                result = "0" + result;
+            }
+
             // 返回数据
             StringBuilder sb = new StringBuilder();
 
@@ -371,7 +375,6 @@ public class CardScanerPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 sb.append(result.charAt(i - 2));
                 sb.append(result.charAt(i - 1));
             }
-
             // 将数据
             return sb.toString().toUpperCase();
 
