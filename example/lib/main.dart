@@ -84,11 +84,11 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
             child: Column(
-          children: [
-            Text('Device : $_platformVersion\n'),
-            Text('Value : $_deviceValue\n'),
-          ],
-        )),
+              children: [
+                Text('Device : $_platformVersion\n'),
+                Text('Value : $_deviceValue\n'),
+              ],
+            )),
         floatingActionButton: FloatingActionButton(
           onPressed: openDevice,
           child: Icon(Icons.open_in_browser),

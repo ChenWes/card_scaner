@@ -21,7 +21,7 @@ class CardScaner {
     } on PlatformException catch (ex) {
       if (ex.message == 'DeviceOpenFail') {
         final String? result =
-            await Future.delayed(const Duration(seconds: 2), () {
+        await Future.delayed(const Duration(seconds: 2), () {
           return openDevice;
         });
         return result;
